@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arbeitszeitrechner</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#f0f2f5;
+    display:flex;
+    justify-content:center;
+    padding:30px;
+}
+
+.container{
+    width:700px;
+    max-width:100%;
+}
+
+.card{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,.15);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+h2{
+    margin-bottom:15px;
+    color:#333;
+}
+
+label{
+    display:block;
+    margin-top:15px;
+    margin-bottom:5px;
+    font-weight:bold;
+}
+
+input,select{
+    width:100%;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:16px;
+}
+
+button{
+    width:100%;
+    margin-top:20px;
+    padding:12px;
+    border:none;
+    background:#2196f3;
+    color:white;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:17px;
+}
+
+button:hover{
+    background:#1976d2;
+}
+
+.ergebnis{
+    margin-top:20px;
+    background:#eef6ff;
+    padding:15px;
+    border-radius:10px;
+    font-size:18px;
+    line-height:1.8;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🕒 Arbeitszeitrechner</h1>
+
+<div class="card">
+
+<h2>Feierabend berechnen</h2>
+
+
+<label>Arbeitsbeginn</label>
+<input type="time" id="eingang1">
+
+
+<label>Arbeitszeit</label>
+
+<select id="arbeitszeit1">
+<option value="299.4">4,99 Stunden</option>
+<option value="374.4">6,24 Stunden</option>
+<option value="450">7,5 Stunden</option>
+<option value="480">8 Stunden</option>
+</select>
+
+
+<label>Wochenarbeitszeit</label>
+
+<select id="woche1" onchange="arbeitszeitAnpassen()">
+<option value="30">30 Stunden pro Woche</option>
+<option value="35">35 Stunden pro Woche</option>
+<option value="37.5" selected>37,5 Stunden pro Woche</option>
+<option value="40">40 Stunden pro Woche</option>
+</select>
+
+
+<label>Zusätzliche Pause (Minuten)</label>
+<input type="number" id="pausaExtra" min="0" placeholder="z.B. 30">
+
+
+<button onclick="berechneEnde()">Feierabend berechnen</button>
+
+
+<div class="ergebnis" id="ergebnisEnde"></div>
+
+
+</div>
+
+</div>
+
+
+<script>
+
+
+function arbeitszeitAnpassen(){
+
+let woche=document.getElementById("woche1").value;
+
+let select=document.getElementById("arbeitszeit1");
+
+
+if(woche=="30"){
+
+select.innerHTML=`
+<option value="299.4">4,99 Stunden</option>
+<option value="374.4">6,24 Stunden</option>
+`;
+
+}
+
+else if(woche=="35"){
+
+select.innerHTML=`
+<option value="299.4">4,99 Stunden</option>
+<option value="374.4">6,24 Stunden</option>
+<option value="420">7 Stunden</option>
+`;
+
+}
+
+else if(woche=="37.5"){
+
+select.innerHTML=`
+<option value="299.4">4,99 Stunden</option>
+<option value="374.4">6,24 Stunden</option>
+<option value="450" selected>7,5 Stunden</option>
+`;
+
+}
+
+else if(woche=="40"){
+
+select.innerHTML=`
+<option value="299.4">4,99 Stunden</option>
+<option value="374.4">6,24 Stunden</option>
+<option value="480" selected>8 Stunden</option>
+`;
+
+}
+
+}
+
+
+
+function zeitInMinuten(zeit){
+
+let teile = zeit.split(":");
+
+return parseInt(teile[0])*60 + parseInt(teile[1]);
+
+}
+
+
+
+function formatZeit(minuten){
+
+minuten=((minuten%1440)+1440)%1440;
+
+let stunden=Math.floor(minuten/60);
+
+let minutenTeil=Math.round(minuten%60);
+
+
+return String(stunden).padStart(2,"0")+":"+String(minutenTeil).padStart(2,"0");
+
+}
+
+
+
+function pauseBerechnen(arbeit){
+
+if(arbeit<=299.4){
+    return 0;
+}
+
+if(arbeit<=374.4){
+    return 30;
+}
+
+return 45;
+
+}
+
+
+
+function formatArbeitszeit(minuten){
+
+let stunden=minuten/60;
+
+if(stunden===7.5){
+    return "7,5";
+}
+
+if(stunden===8){
+    return "8";
+}
+
+if(stunden===7){
+    return "7";
+}
+
+if(Math.abs(stunden-6.24)<0.01){
+    return "6,24";
+}
+
+return stunden.toFixed(2).replace(".",",");
+
+}
+
+
+
+function berechneEnde(){
+
+let start=document.getElementById("eingang1").value;
+
+
+if(!start){
+
+alert("Bitte Arbeitsbeginn eingeben.");
+
+return;
+
+}
+
+
+let arbeit=parseFloat(document.getElementById("arbeitszeit1").value);
+
+
+// pausa automática
+let pause=pauseBerechnen(arbeit);
+
+
+// pausa adicional del usuario
+let pausaExtra=parseInt(document.getElementById("pausaExtra").value) || 0;
+
+
+// pausa total
+let pausaTotal=pause + pausaExtra;
+
+
+// cálculo de salida
+let ende=zeitInMinuten(start)+arbeit+pausaTotal;
+
+
+let woche=document.getElementById("woche1").value.replace(".",",");
+
+
+
+document.getElementById("ergebnisEnde").innerHTML=
+
+`
+<b>Arbeitszeit:</b> ${formatArbeitszeit(arbeit)} Stunden<br>
+<b>Wochenarbeitszeit:</b> ${woche} Stunden/Woche<br>
+<b>Reguläre Pause:</b> ${pause} Minuten<br>
+<b>Zusätzliche Pause:</b> ${pausaExtra} Minuten<br>
+<b>Gesamte Pause:</b> ${pausaTotal} Minuten<br>
+<b>Feierabend:</b> ${formatZeit(ende)}
+`;
+
+}
+
+
+</script>
+
+
+</body>
+</html>
