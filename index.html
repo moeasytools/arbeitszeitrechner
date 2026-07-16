@@ -29,7 +29,7 @@ body{
     background:white;
     padding:25px;
     border-radius:15px;
-    box-shadow:0 10px:25px rgba(0,0,0,.15);
+    box-shadow:0 10px 25px rgba(0,0,0,.15);
 }
 
 h1{
@@ -120,6 +120,10 @@ button:hover{
 </select>
 
 
+<label>Zusätzliche Pause (Minuten)</label>
+<input type="number" id="pausaExtra" min="0" placeholder="z.B. 30">
+
+
 <button onclick="berechneEnde()">Feierabend berechnen</button>
 
 
@@ -151,7 +155,6 @@ select.innerHTML=`
 
 }
 
-
 else if(woche=="35"){
 
 select.innerHTML=`
@@ -162,7 +165,6 @@ select.innerHTML=`
 
 }
 
-
 else if(woche=="37.5"){
 
 select.innerHTML=`
@@ -172,7 +174,6 @@ select.innerHTML=`
 `;
 
 }
-
 
 else if(woche=="40"){
 
@@ -267,10 +268,21 @@ return;
 
 let arbeit=parseFloat(document.getElementById("arbeitszeit1").value);
 
+
+// pausa obligatoria
 let pause=pauseBerechnen(arbeit);
 
 
-let ende=zeitInMinuten(start)+arbeit+pause;
+// pausa adicional introducida por usuario
+let pausaExtra=parseInt(document.getElementById("pausaExtra").value) || 0;
+
+
+// pausa total
+let pausaTotal=pause + pausaExtra;
+
+
+// cálculo final
+let ende=zeitInMinuten(start)+arbeit+pausaTotal;
 
 
 let woche=document.getElementById("woche1").value.replace(".",",");
@@ -282,7 +294,9 @@ document.getElementById("ergebnisEnde").innerHTML=
 `
 <b>Arbeitszeit:</b> ${formatArbeitszeit(arbeit)} Stunden<br>
 <b>Wochenarbeitszeit:</b> ${woche} Stunden/Woche<br>
-<b>Pause:</b> ${pause} Minuten<br>
+<b>Reguläre Pause:</b> ${pause} Minuten<br>
+<b>Zusätzliche Pause:</b> ${pausaExtra} Minuten<br>
+<b>Gesamte Pause:</b> ${pausaTotal} Minuten<br>
 <b>Feierabend:</b> ${formatZeit(ende)}
 `;
 
