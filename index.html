@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Arbeitszeit- und Urlaubsrechner Hamburg</title>
+
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+
+body{
+
+    background:#f0f2f5;
+    padding:30px;
+
+}
+
+
+
+.container{
+
+    width:1400px;
+    max-width:100%;
+    margin:auto;
+
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+
+}
+
+
+
+.card{
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:15px;
+
+    box-shadow:
+    0 10px 25px rgba(0,0,0,.15);
+
+}
+
+
+
+h1{
+
+    grid-column:1 / -1;
+
+    text-align:center;
+
+    margin-bottom:5px;
+
+}
+
+
+
+h2{
+
+    color:#333;
+
+    margin-bottom:20px;
+
+}
+
+
+
+h3{
+
+    margin-top:15px;
+
+    color:#1976d2;
+
+}
+
+
+
+label{
+
+    display:block;
+
+    margin-top:15px;
+
+    margin-bottom:5px;
+
+    font-weight:bold;
+
+}
+
+
+
+input,
+select{
+
+
+    width:100%;
+
+    padding:10px;
+
+    border-radius:8px;
+
+    border:1px solid #ccc;
+
+    font-size:16px;
+
+
+}
+
+
+
+button{
+
+
+    width:100%;
+
+    margin-top:20px;
+
+    padding:12px;
+
+    border:none;
+
+    background:#2196f3;
+
+    color:white;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-size:17px;
+
+
+}
+
+
+
+button:hover{
+
+    background:#1976d2;
+
+}
+
+
+
+.ergebnis{
+
+
+    margin-top:20px;
+
+    background:#eef6ff;
+
+    padding:15px;
+
+    border-radius:10px;
+
+    line-height:1.8;
+
+    font-size:17px;
+
+
+}
+
+
+
+.feiertage{
+
+
+    max-height:650px;
+
+    overflow-y:auto;
+
+}
+
+
+
+.feiertage ul{
+
+
+    list-style:none;
+
+    margin-bottom:15px;
+
+
+}
+
+
+
+.feiertage li{
+
+
+    padding:5px;
+
+    color:#c62828;
+
+    font-weight:bold;
+
+
+}
+
+
+
+@media(max-width:1000px){
+
+
+.container{
+
+    grid-template-columns:1fr;
+
+}
+
+
+}
+
+
+
+</style>
+
+
+</head>
+
+
+
+<body>
+
+
+
+<div class="container">
+
+
+
+<h1>
+🕒 Arbeitszeit- und Urlaubsrechner
+</h1>
+
+
+
+<!-- ==========================
+     ARBEITSZEITRECHNER
+=========================== -->
+
+
+<div class="card">
+
+
+<h2>🕒 Feierabend berechnen</h2>
+
+
+
+<label>Arbeitsbeginn</label>
+
+<input type="time" id="eingang1">
+
+
+
+<label>Arbeitszeit</label>
+
+<select id="arbeitszeit1">
+
+<option value="299.4">
+4,99 Stunden
+</option>
+
+<option value="374.4">
+6,24 Stunden
+</option>
+
+<option value="450">
+7,5 Stunden
+</option>
+
+<option value="480">
+8 Stunden
+</option>
+
+</select>
+
+
+
+
+<label>Wochenarbeitszeit</label>
+
+<select id="woche1"
+onchange="arbeitszeitAnpassen()">
+
+
+<option value="30">
+30 Stunden pro Woche
+</option>
+
+
+<option value="35">
+35 Stunden pro Woche
+</option>
+
+
+<option value="37.5" selected>
+37,5 Stunden pro Woche
+</option>
+
+
+<option value="40">
+40 Stunden pro Woche
+</option>
+
+
+</select>
+
+
+
+<label>
+Zusätzliche Pause (Minuten)
+</label>
+
+
+<input type="number"
+id="pausaExtra"
+min="0"
+placeholder="z.B. 30">
+
+
+
+<button onclick="berechneEnde()">
+
+Feierabend berechnen
+
+</button>
+
+
+
+<div class="ergebnis" id="ergebnisEnde"></div>
+
+
+</div>
+
+
+
+
+<script>
+
+</div>
+
+
+
+</div>
+
+// ===============================
+// FEIERTAGE HAMBURG 2026-2029
+// ===============================
+
+
+const feiertageHamburg = {
+
+"2026":[
+["01.01.2026","Neujahr"],
+["03.04.2026","Karfreitag"],
+["06.04.2026","Ostermontag"],
+["01.05.2026","Tag der Arbeit"],
+["14.05.2026","Christi Himmelfahrt"],
+["25.05.2026","Pfingstmontag"],
+["03.10.2026","Tag der Deutschen Einheit"],
+["31.10.2026","Reformationstag"],
+["25.12.2026","1. Weihnachtsfeiertag"],
+["26.12.2026","2. Weihnachtsfeiertag"]
+],
+
+
+"2027":[
+["01.01.2027","Neujahr"],
+["26.03.2027","Karfreitag"],
+["29.03.2027","Ostermontag"],
+["01.05.2027","Tag der Arbeit"],
+["06.05.2027","Christi Himmelfahrt"],
+["17.05.2027","Pfingstmontag"],
+["03.10.2027","Tag der Deutschen Einheit"],
+["31.10.2027","Reformationstag"],
+["25.12.2027","1. Weihnachtsfeiertag"],
+["26.12.2027","2. Weihnachtsfeiertag"]
+],
+
+
+"2028":[
+["01.01.2028","Neujahr"],
+["14.04.2028","Karfreitag"],
+["17.04.2028","Ostermontag"],
+["01.05.2028","Tag der Arbeit"],
+["25.05.2028","Christi Himmelfahrt"],
+["05.06.2028","Pfingstmontag"],
+["03.10.2028","Tag der Deutschen Einheit"],
+["31.10.2028","Reformationstag"],
+["25.12.2028","1. Weihnachtsfeiertag"],
+["26.12.2028","2. Weihnachtsfeiertag"]
+],
+
+
+"2029":[
+["01.01.2029","Neujahr"],
+["30.03.2029","Karfreitag"],
+["02.04.2029","Ostermontag"],
+["01.05.2029","Tag der Arbeit"],
+["10.05.2029","Christi Himmelfahrt"],
+["21.05.2029","Pfingstmontag"],
+["03.10.2029","Tag der Deutschen Einheit"],
+["31.10.2029","Reformationstag"],
+["25.12.2029","1. Weihnachtsfeiertag"],
+["26.12.2029","2. Weihnachtsfeiertag"]
+]
+
+};
+
+
+
+// Kalender anzeigen
+
+let kalenderHTML="";
+
+
+for(let jahr in feiertageHamburg){
+
+kalenderHTML += `<h3>${jahr}</h3>`;
+kalenderHTML += "<ul>";
+
+feiertageHamburg[jahr].forEach(tag=>{
+
+kalenderHTML += 
+`
+<li style="color:#c62828">
+📌 ${tag[0]} - ${tag[1]}
+</li>
+`;
+
+});
+
+kalenderHTML+="</ul>";
+
+}
+
+
+document.getElementById("feiertagsKalender").innerHTML=kalenderHTML;
+
+
+
+
+
+// ===============================
+// URLAUBSBERECHNUNG
+// ===============================
+
+
+
+function istFeiertag(datum){
+
+let iso=datum.toISOString().split("T")[0];
+
+
+let alle=[];
+
+
+Object.values(feiertageHamburg).forEach(jahr=>{
+
+jahr.forEach(f=>{
+
+let teile=f[0].split(".");
+
+alle.push(
+`${teile[2]}-${teile[1]}-${teile[0]}`
+);
+
+});
+
+});
+
+
+return alle.includes(iso);
+
+}
+
+
+
+
+
+function istArbeitstag(datum){
+
+let tag=datum.getDay();
+
+
+if(tag===0 || tag===6){
+
+return false;
+
+}
+
+
+if(istFeiertag(datum)){
+
+return false;
+
+}
+
+
+return true;
+
+}
+
+
+
+
+
+function urlaubBerechnen(){
+
+
+let start=document.getElementById("urlaubStart").value;
+
+let tage=parseInt(
+document.getElementById("urlaubTage").value
+);
+
+
+
+if(!start){
+
+alert("Bitte Urlaubsbeginn auswählen");
+
+return;
+
+}
+
+
+
+let datum=new Date(start);
+
+let verbraucht=0;
+
+
+while(verbraucht < tage){
+
+
+if(istArbeitstag(datum)){
+
+verbraucht++;
+
+}
+
+
+if(verbraucht < tage){
+
+datum.setDate(
+datum.getDate()+1
+);
+
+}
+
+
+}
+
+
+
+let ende=datum.toLocaleDateString("de-DE");
+
+
+
+let startAnzeige=
+new Date(start)
+.toLocaleDateString("de-DE");
+
+
+
+let kalendertage=Math.ceil(
+(datum-new Date(start))
+/(1000*60*60*24)
+)+1;
+
+
+
+document.getElementById("urlaubErgebnis").innerHTML=
+
+`
+<b>Urlaubsbeginn:</b> ${startAnzeige}<br>
+<b>Urlaubstage:</b> ${tage}<br>
+<b>Letzter freier Tag:</b> ${ende}<br>
+<b>Gesamte freie Kalendertage:</b> ${kalendertage}
+`;
+
+}
+
+function arbeitszeitAnpassen(){
+
+let woche=document.getElementById("woche1").value;
+
+let select=document.getElementById("arbeitszeit1");
+
+
+if(woche=="30"){
+
+select.innerHTML=`
+<option value="299.4">4,99 Stunden</option>
+<option value="374.4">6,24 Stunden</option>
+`;
+
+}
+
+else if(woche=="35"){
+
+select.innerHTML=`
+<option value="299.4">4,99 Stunden</option>
+<option value="374.4">6,24 Stunden</option>
+<option value="420">7 Stunden</option>
+`;
+
+}
+
+else if(woche=="37.5"){
+
+select.innerHTML=`
+<option value="299.4">4,99 Stunden</option>
+<option value="374.4">6,24 Stunden</option>
+<option value="450" selected>7,5 Stunden</option>
+`;
+
+}
+
+else if(woche=="40"){
+
+select.innerHTML=`
+<option value="299.4">4,99 Stunden</option>
+<option value="374.4">6,24 Stunden</option>
+<option value="480" selected>8 Stunden</option>
+`;
+
+}
+
+}
+
+
+
+function zeitInMinuten(zeit){
+
+let teile = zeit.split(":");
+
+return parseInt(teile[0])*60 + parseInt(teile[1]);
+
+}
+
+
+
+function formatZeit(minuten){
+
+minuten=((minuten%1440)+1440)%1440;
+
+let stunden=Math.floor(minuten/60);
+
+let minutenTeil=Math.round(minuten%60);
+
+
+return String(stunden).padStart(2,"0")+":"+String(minutenTeil).padStart(2,"0");
+
+}
+
+
+
+function pauseBerechnen(arbeit){
+
+if(arbeit<=299.4){
+    return 0;
+}
+
+if(arbeit<=374.4){
+    return 30;
+}
+
+return 45;
+
+}
+
+
+
+function formatArbeitszeit(minuten){
+
+let stunden=minuten/60;
+
+if(stunden===7.5){
+    return "7,5";
+}
+
+if(stunden===8){
+    return "8";
+}
+
+if(stunden===7){
+    return "7";
+}
+
+if(Math.abs(stunden-6.24)<0.01){
+    return "6,24";
+}
+
+return stunden.toFixed(2).replace(".",",");
+
+}
+
+
+
+function berechneEnde(){
+
+let start=document.getElementById("eingang1").value;
+
+
+if(!start){
+
+alert("Bitte Arbeitsbeginn eingeben.");
+
+return;
+
+}
+
+
+let arbeit=parseFloat(document.getElementById("arbeitszeit1").value);
+
+
+// pausa automática
+let pause=pauseBerechnen(arbeit);
+
+
+// pausa adicional del usuario
+let pausaExtra=parseInt(document.getElementById("pausaExtra").value) || 0;
+
+
+// pausa total
+let pausaTotal=pause + pausaExtra;
+
+
+// cálculo de salida
+let ende=zeitInMinuten(start)+arbeit+pausaTotal;
+
+
+let woche=document.getElementById("woche1").value.replace(".",",");
+
+
+
+document.getElementById("ergebnisEnde").innerHTML=
+
+`
+<b>Arbeitszeit:</b> ${formatArbeitszeit(arbeit)} Stunden<br>
+<b>Wochenarbeitszeit:</b> ${woche} Stunden/Woche<br>
+<b>Reguläre Pause:</b> ${pause} Minuten<br>
+<b>Zusätzliche Pause:</b> ${pausaExtra} Minuten<br>
+<b>Gesamte Pause:</b> ${pausaTotal} Minuten<br>
+<b>Feierabend:</b> ${formatZeit(ende)}
+`;
+
+}
+// Festivos oficiales de Hamburgo 2026-2029
+const festivosHamburgo = [
+
+"2026-01-01","2026-04-03","2026-04-06",
+"2026-05-01","2026-05-14","2026-05-25",
+"2026-10-03","2026-10-31",
+"2026-12-25","2026-12-26",
+
+"2027-01-01","2027-03-26","2027-03-29",
+"2027-05-01","2027-05-06","2027-05-17",
+"2027-10-03","2027-10-31",
+"2027-12-25","2027-12-26",
+
+"2028-01-01","2028-04-14","2028-04-17",
+"2028-05-01","2028-05-25","2028-06-05",
+"2028-10-03","2028-10-31",
+"2028-12-25","2028-12-26",
+
+"2029-01-01","2029-03-30","2029-04-02",
+"2029-05-01","2029-05-10","2029-05-21",
+"2029-10-03","2029-10-31",
+"2029-12-25","2029-12-26"
+
+];
+
+
+
+function esFestivo(fecha){
+
+    let formato = fecha.toISOString().split("T")[0];
+
+    return festivosHamburgo.includes(formato);
+
+}
+
+
+
+function esDiaLaborable(fecha){
+
+    let dia = fecha.getDay();
+
+    // 0 domingo, 6 sábado
+
+    if(dia===0 || dia===6){
+        return false;
+    }
+
+    if(esFestivo(fecha)){
+        return false;
+    }
+
+    return true;
+
+}
+
+
+
+function calcularVacaciones(){
+
+    let inicio = document.getElementById("inicioVacaciones").value;
+    let dias = parseInt(document.getElementById("diasVacaciones").value);
+
+
+    if(!inicio || !dias){
+
+        alert("Introduce fecha y días de vacaciones");
+        return;
+
+    }
+
+
+    let fecha = new Date(inicio);
+
+    let usados = 0;
+
+
+    while(usados < dias){
+
+        if(esDiaLaborable(fecha)){
+
+            usados++;
+
+        }
+
+
+        if(usados < dias){
+
+            fecha.setDate(fecha.getDate()+1);
+
+        }
+
+    }
+
+
+    let final = fecha.toLocaleDateString("de-DE");
+
+
+    let totalDias = Math.ceil(
+        (fecha - new Date(inicio)) / (1000*60*60*24)
+    ) + 1;
+
+
+
+    document.getElementById("resultadoVacaciones").innerHTML =
+
+    `
+    <b>Días de vacaciones solicitados:</b> ${dias}<br>
+    <b>Primer día:</b> ${new Date(inicio).toLocaleDateString("de-DE")}<br>
+    <b>Último día libre:</b> ${final}<br>
+    <b>Total días naturales libres:</b> ${totalDias}
+    `;
+
+}
+
+</script>
+<div class="card">
+
+<h2>📅 Feiertagskalender Hamburg 2026 - 2029</h2>
+
+<div id="feiertagsKalender"></div>
+
+</div>
+
+
+<div class="card">
+
+<h2>🏖️ Urlaubsrechner (Montag bis Freitag)</h2>
+
+
+<label>Urlaubsbeginn</label>
+<input type="date" id="urlaubStart">
+
+
+<label>Anzahl Urlaubstage</label>
+<input type="number" id="urlaubTage" value="10" min="1">
+
+
+<button onclick="urlaubBerechnen()">
+Urlaub berechnen
+</button>
+
+
+<div class="ergebnis" id="urlaubErgebnis"></div>
+
+
+</div>
+<script>
+
+
+// =======================================
+// FEIERTAGE HAMBURG 2026 - 2029
+// =======================================
+
+
+const feiertageHamburg = {
+
+
+2026:[
+
+["01.01.2026","Neujahr"],
+["03.04.2026","Karfreitag"],
+["06.04.2026","Ostermontag"],
+["01.05.2026","Tag der Arbeit"],
+["14.05.2026","Christi Himmelfahrt"],
+["25.05.2026","Pfingstmontag"],
+["03.10.2026","Tag der Deutschen Einheit"],
+["31.10.2026","Reformationstag"],
+["25.12.2026","1. Weihnachtsfeiertag"],
+["26.12.2026","2. Weihnachtsfeiertag"]
+
+],
+
+
+
+2027:[
+
+["01.01.2027","Neujahr"],
+["26.03.2027","Karfreitag"],
+["29.03.2027","Ostermontag"],
+["01.05.2027","Tag der Arbeit"],
+["06.05.2027","Christi Himmelfahrt"],
+["17.05.2027","Pfingstmontag"],
+["03.10.2027","Tag der Deutschen Einheit"],
+["31.10.2027","Reformationstag"],
+["25.12.2027","1. Weihnachtsfeiertag"],
+["26.12.2027","2. Weihnachtsfeiertag"]
+
+],
+
+
+
+2028:[
+
+["01.01.2028","Neujahr"],
+["14.04.2028","Karfreitag"],
+["17.04.2028","Ostermontag"],
+["01.05.2028","Tag der Arbeit"],
+["25.05.2028","Christi Himmelfahrt"],
+["05.06.2028","Pfingstmontag"],
+["03.10.2028","Tag der Deutschen Einheit"],
+["31.10.2028","Reformationstag"],
+["25.12.2028","1. Weihnachtsfeiertag"],
+["26.12.2028","2. Weihnachtsfeiertag"]
+
+],
+
+
+
+2029:[
+
+["01.01.2029","Neujahr"],
+["30.03.2029","Karfreitag"],
+["02.04.2029","Ostermontag"],
+["01.05.2029","Tag der Arbeit"],
+["10.05.2029","Christi Himmelfahrt"],
+["21.05.2029","Pfingstmontag"],
+["03.10.2029","Tag der Deutschen Einheit"],
+["31.10.2029","Reformationstag"],
+["25.12.2029","1. Weihnachtsfeiertag"],
+["26.12.2029","2. Weihnachtsfeiertag"]
+
+]
+
+
+};
+
+
+
+
+// =======================================
+// KALENDER ANZEIGEN
+// =======================================
+
+
+let kalenderHTML="";
+
+
+for(let jahr in feiertageHamburg){
+
+
+kalenderHTML += `
+
+<h3>${jahr}</h3>
+
+<ul>
+
+`;
+
+
+feiertageHamburg[jahr].forEach(f=>{
+
+
+kalenderHTML += `
+
+<li>
+📌 ${f[0]} - ${f[1]}
+</li>
+
+`;
+
+
+});
+
+
+kalenderHTML += "</ul>";
+
+}
+
+
+
+document.getElementById("feiertagsKalender").innerHTML =
+kalenderHTML;
+
+
+
+
+
+
+// =======================================
+// FESTTAGE FÜR BERECHNUNG
+// =======================================
+
+
+function alleFeiertage(){
+
+
+let liste=[];
+
+
+Object.values(feiertageHamburg).forEach(jahr=>{
+
+
+jahr.forEach(f=>{
+
+
+let d=f[0].split(".");
+
+
+liste.push(
+`${d[2]}-${d[1]}-${d[0]}`
+);
+
+
+});
+
+
+});
+
+
+return liste;
+
+
+}
+
+
+
+
+
+
+function istFeiertag(datum){
+
+
+let iso =
+datum.toISOString().split("T")[0];
+
+
+return alleFeiertage().includes(iso);
+
+
+}
+
+
+
+
+
+
+function istArbeitstag(datum){
+
+
+let tag=datum.getDay();
+
+
+
+if(tag===0 || tag===6){
+
+return false;
+
+}
+
+
+
+if(istFeiertag(datum)){
+
+return false;
+
+}
+
+
+
+return true;
+
+
+}
+
+
+
+
+
+
+
+
+// =======================================
+// URLAUBSBERECHNUNG
+// =======================================
+
+
+function urlaubBerechnen(){
+
+
+
+let start =
+document.getElementById("urlaubStart").value;
+
+
+
+let tage =
+parseInt(
+document.getElementById("urlaubTage").value
+);
+
+
+
+if(!start || !tage){
+
+alert("Bitte Urlaubsbeginn und Urlaubstage eingeben.");
+
+return;
+
+}
+
+
+
+let datum=new Date(start);
+
+
+
+let zaehler=0;
+
+
+
+while(zaehler < tage){
+
+
+if(istArbeitstag(datum)){
+
+
+zaehler++;
+
+
+}
+
+
+
+if(zaehler < tage){
+
+
+datum.setDate(
+datum.getDate()+1
+);
+
+
+}
+
+
+}
+
+
+
+
+let ende =
+datum.toLocaleDateString("de-DE");
+
+
+
+let beginn =
+new Date(start)
+.toLocaleDateString("de-DE");
+
+
+
+let kalendertage =
+
+Math.floor(
+(datum-new Date(start))
+/
+(1000*60*60*24)
+)+1;
+
+
+
+
+document.getElementById("urlaubErgebnis").innerHTML = `
+
+
+<b>Urlaubsbeginn:</b> ${beginn}<br>
+
+<b>Urlaubstage:</b> ${tage}<br>
+
+<b>Letzter Urlaubstag:</b> ${ende}<br>
+
+<b>Gesamte freie Kalendertage:</b> ${kalendertage}
+
+
+`;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =======================================
+// ARBEITSZEIT ANPASSEN
+// =======================================
+
+
+function arbeitszeitAnpassen(){
+
+
+let woche =
+document.getElementById("woche1").value;
+
+
+let select =
+document.getElementById("arbeitszeit1");
+
+
+
+if(woche=="30"){
+
+
+select.innerHTML=`
+
+<option value="299.4">
+4,99 Stunden
+</option>
+
+<option value="374.4">
+6,24 Stunden
+</option>
+
+`;
+
+
+
+}
+
+
+else if(woche=="35"){
+
+
+select.innerHTML=`
+
+<option value="299.4">
+4,99 Stunden
+</option>
+
+<option value="374.4">
+6,24 Stunden
+</option>
+
+<option value="420">
+7 Stunden
+</option>
+
+`;
+
+
+}
+
+
+
+else if(woche=="37.5"){
+
+
+select.innerHTML=`
+
+<option value="299.4">
+4,99 Stunden
+</option>
+
+<option value="374.4">
+6,24 Stunden
+</option>
+
+<option value="450" selected>
+7,5 Stunden
+</option>
+
+`;
+
+
+
+}
+
+
+
+else{
+
+
+select.innerHTML=`
+
+<option value="299.4">
+4,99 Stunden
+</option>
+
+<option value="374.4">
+6,24 Stunden
+</option>
+
+<option value="480" selected>
+8 Stunden
+</option>
+
+`;
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+// =======================================
+// FEIERABEND
+// =======================================
+
+
+
+function zeitInMinuten(zeit){
+
+
+let t=zeit.split(":");
+
+
+return parseInt(t[0])*60+
+parseInt(t[1]);
+
+
+}
+
+
+
+
+
+
+
+function formatZeit(minuten){
+
+
+minuten =
+((minuten%1440)+1440)%1440;
+
+
+
+let h =
+Math.floor(minuten/60);
+
+
+
+let m =
+Math.round(minuten%60);
+
+
+
+return String(h).padStart(2,"0")
++
+":"
++
+String(m).padStart(2,"0");
+
+
+}
+
+
+
+
+
+
+
+
+function pauseBerechnen(arbeit){
+
+
+if(arbeit<=299.4){
+
+return 0;
+
+}
+
+
+
+if(arbeit<=374.4){
+
+return 30;
+
+}
+
+
+
+return 45;
+
+
+}
+
+
+
+
+
+
+
+function formatArbeitszeit(minuten){
+
+
+let h=minuten/60;
+
+
+
+if(h===7.5){
+
+return "7,5";
+
+}
+
+
+if(h===8){
+
+return "8";
+
+}
+
+
+if(h===7){
+
+return "7";
+
+}
+
+
+
+if(Math.abs(h-6.24)<0.01){
+
+return "6,24";
+
+}
+
+
+
+return h.toFixed(2)
+.replace(".",",");
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function berechneEnde(){
+
+
+
+let start =
+document.getElementById("eingang1").value;
+
+
+
+if(!start){
+
+
+alert("Bitte Arbeitsbeginn eingeben.");
+
+return;
+
+
+}
+
+
+
+let arbeit =
+parseFloat(
+document.getElementById("arbeitszeit1").value
+);
+
+
+
+let pause =
+pauseBerechnen(arbeit);
+
+
+
+let extra =
+parseInt(
+document.getElementById("pausaExtra").value
+)
+||0;
+
+
+
+let ende =
+zeitInMinuten(start)
++
+arbeit
++
+pause
++
+extra;
+
+
+
+
+
+let woche =
+document.getElementById("woche1")
+.value
+.replace(".",",");
+
+
+
+
+
+document.getElementById("ergebnisEnde").innerHTML = `
+
+
+<b>Arbeitszeit:</b>
+${formatArbeitszeit(arbeit)} Stunden<br>
+
+
+<b>Wochenarbeitszeit:</b>
+${woche} Stunden/Woche<br>
+
+
+<b>Reguläre Pause:</b>
+${pause} Minuten<br>
+
+
+<b>Zusätzliche Pause:</b>
+${extra} Minuten<br>
+
+
+<b>Gesamte Pause:</b>
+${pause+extra} Minuten<br>
+
+
+<b>Feierabend:</b>
+${formatZeit(ende)}
+
+
+`;
+
+
+
+}
+
+
+
+</script>
+</body>
+</html>
